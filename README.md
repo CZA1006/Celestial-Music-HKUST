@@ -1,28 +1,83 @@
-# 🌌 天文音乐生成系统 (Celestial Music Generator)
+# 28星宿天体音乐生成器 🌟🎵
 
-基于中国传统二十八星宿和五行理论的智能音乐生成系统，将天象数据转化为独特的音乐作品。
+[![GitHub stars](https://img.shields.io/github/stars/CZA1006/Celestial-Music-HKUST?style=social)](https://github.com/CZA1006/Celestial-Music-HKUST/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/CZA1006/Celestial-Music-HKUST?style=social)](https://github.com/CZA1006/Celestial-Music-HKUST/network)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Python](https://img.shields.io/badge/Python-3.8+-brightgreen.svg)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.95+-green.svg)](https://fastapi.tiangolo.com)
 
-## ✨ 项目特色
+基于传统中国天文学和五行理论的智能音乐生成系统，将古代星宿知识与现代AI技术完美融合。
 
-- 🏺 **古典界面设计** - 青铜环时间选择器，古代天文仪器风格
-- 🌙 **二十八星宿系统** - 完整的传统中国天文学支持
-- 🎵 **智能音乐生成** - 基于五行理论的专业音乐创作
-- 🌍 **精确天文计算** - 基于真实天体数据的高精度计算
-- 📱 **跨平台支持** - 响应式设计，支持电脑、平板、手机
+## 🌌 项目简介
 
-## 🚀 快速开始
+**28星宿天体音乐生成器**是一个创新的跨学科项目，它：
+
+- 🏛️ **传承古典文化**：基于中国传统28星宿天文学体系
+- 🧠 **融合现代AI**：利用先进的音乐生成算法
+- 🎭 **五行音乐理论**：根据星宿对应的五行属性生成独特音乐
+- 🌍 **精确天文计算**：实时计算任意时间地点的月亮星宿位置
+- 🎵 **个性化创作**：每个时刻都能生成独一无二的音乐作品
+
+## ✨ 核心功能
+
+### 🕰️ 历史时间选择
+- **日晷式交互界面**：古典与现代结合的时间选择体验
+- **历史时间支持**：可选择1950-2025年间任意时刻
+- **精美视觉设计**：深空星域背景配合古铜质感UI
+
+### 🌍 全球位置定位
+- **3D地球交互**：可旋转的三维地球模型
+- **精确坐标选择**：支持全球任意位置的经纬度选择
+- **城市快速定位**：预设全球主要城市一键选择
+
+### 🌟 28星宿星图可视化
+- **完整星图展示**：真实的28星宿分布和连线
+- **四象分类显示**：东青龙、南朱雀、西白虎、北玄武
+- **实时天体追踪**：高亮显示月亮当前所在星宿
+- **交互式控制**：旋转、缩放、标注显示等多种控制选项
+
+### 🎼 智能音乐生成
+- **五行音乐映射**：
+  - 🌿 **木**：弦乐器、自然调式、流畅节奏
+  - 🔥 **火**：铜管乐器、激烈调式、快速节拍
+  - 🏔️ **土**：钢琴、稳定调式、扎实节奏
+  - ⚡ **金**：钟声、清脆调式、明亮音色
+  - 🌊 **水**：流动乐器、柔和调式、缓慢节拍
+- **可定制参数**：时长、风格、乐器组合
+- **高质量输出**：45秒完整音乐作品
+
+## 🚀 技术栈
+
+### 后端技术
+- **FastAPI**: 高性能Python Web框架
+- **Astropy**: 专业天文计算库
+- **Pydantic**: 数据验证和序列化
+- **PyTZ**: 时区处理
+
+### 前端技术
+- **Three.js**: 3D图形渲染
+- **HTML5 Canvas**: 2D图形绘制
+- **现代JavaScript**: ES6+语法
+- **响应式设计**: 适配多种设备
+
+### 核心算法
+- **天文计算**: 精确的月亮位置计算
+- **星宿定位**: 28星宿划分算法
+- **五行映射**: 传统五行理论数字化
+- **音乐生成**: AI驱动的音乐创作
+
+## 📦 安装指南
 
 ### 环境要求
-
 - Python 3.8+
-- 现代浏览器 (Chrome 80+, Firefox 75+, Safari 13+)
+- Node.js (可选，用于前端开发)
 
-### 安装步骤
+### 快速开始
 
 1. **克隆项目**
 ```bash
-git clone <your-repository-url>
-cd CELESTIAL-MUSIC-HKUST
+git clone https://github.com/CZA1006/Celestial-Music-HKUST.git
+cd Celestial-Music-HKUST
 ```
 
 2. **安装依赖**
@@ -30,405 +85,168 @@ cd CELESTIAL-MUSIC-HKUST
 pip install -r requirements.txt
 ```
 
-3. **运行后端服务**
+3. **创建项目结构**
 ```bash
-python backend_app.py
+mkdir -p static modules
 ```
 
-4. **访问系统**
-
-   打开浏览器访问：`http://localhost:8000/static/index.html`
-
-## 📁 项目结构
-
+4. **配置文件**
+将前端文件放入`static`目录：
 ```
-CELESTIAL-MUSIC-HKUST/
-├── modules/
-│   ├── __pycache__/
-│   ├── __init__.py
-│   ├── astronomy.py      # 天文计算模块
-│   ├── generation.py     # 音乐生成模块
-│   ├── mapping.py        # 音乐参数映射
-│   └── wuxing.py         # 五行映射系统
-├── static/
-│   └── index.html        # 前端界面
-├── backend_app.py        # FastAPI主应用
-├── requirements.txt      # 依赖包列表
-└── README.md            # 项目说明文档
+static/
+├── time-selector.html
+├── location-selector.html
+└── starmap.html
 ```
 
-## 🎯 功能模块
+将后端模块放入`modules`目录：
+```
+modules/
+├── __init__.py
+├── astronomy.py
+├── wuxing.py
+├── mapping.py
+└── generation.py
+```
 
-### 天文计算 (astronomy.py)
-- 精确的月亮黄经计算
-- 二十八星宿位置判定
-- 基于Astropy的专业天文算法
-- 支持任意时间和地点的天象计算
+5. **启动服务**
+```bash
+uvicorn backend_app:app --reload
+```
 
-### 五行映射 (wuxing.py)
-- 传统四象七宿分配
-- 东方青龙七宿 → 木
-- 南方朱雀七宿 → 火
-- 西方白虎七宿 → 金
-- 北方玄武七宿 → 水
+6. **访问应用**
+打开浏览器访问 `http://localhost:8000`
 
-### 音乐生成 (generation.py)
-- 调用外部音乐生成API (`https://yue-inst.ngrok.app`)
-- 支持45秒完整音乐作品
-- 智能重试机制和错误处理
-- 多种音乐风格支持
+## 📖 使用指南
 
-### 参数映射 (mapping.py)
-- 五行到音乐参数的专业转换
-- 乐器选择：弦乐、管乐、打击乐等
-- 调式映射：多里安、弗里吉亚等教会调式
-- 节拍和情绪的智能匹配
+### 第一步：选择时间 🕰️
+1. 通过日晷式界面选择年份（1950-2025）
+2. 旋转圆环选择月份和日期
+3. 设置具体的小时
+4. 确认时间选择
 
-## 🔧 API接口
+### 第二步：选择位置 🌍
+1. 拖拽旋转3D地球找到目标位置
+2. 点击地球表面选择精确坐标
+3. 或使用快速城市选择功能
+4. 确认地理位置
 
-### 计算天文数据
+### 第三步：生成音乐 🎵
+1. 查看实时计算的天文信息
+2. 观察28星宿星图和月亮位置
+3. 查看根据五行理论匹配的音乐参数
+4. 点击生成音乐，享受独特的星宿音乐
+
+## 🔬 科学原理
+
+### 天文计算
+- 使用Astropy库进行精确的天体位置计算
+- 考虑地球自转、月球轨道等因素
+- 支持任意历史时间和地理位置
+
+### 传统文化
+- **28星宿系统**：中国古代天文学的重要组成部分
+- **四象理论**：东青龙、南朱雀、西白虎、北玄武
+- **五行学说**：金木水火土的相生相克关系
+
+### 音乐理论
+- **调式映射**：不同五行对应不同音乐调式
+- **乐器选择**：根据五行属性选择合适乐器
+- **节奏设计**：五行特性影响音乐节奏和风格
+
+## 📊 API文档
+
+### 天文计算API
 ```http
-POST /api/calculate
+POST /api/astronomy/calculate
 Content-Type: application/json
 
 {
-    "datetime": "2024-01-15T20:30:00",
-    "latitude": 22.3964,
-    "longitude": 114.1095
+  "time_data": {
+    "year": 2025,
+    "month": 6,
+    "day": 11,
+    "hour": 15
+  },
+  "location_data": {
+    "latitude": 22.3193,
+    "longitude": 114.1694,
+    "address": "香港"
+  }
 }
 ```
 
-**返回示例：**
-```json
-{
-    "mansion": "角",
-    "element": "Wood",
-    "moon_ecliptic_lon": 127.45,
-    "timestamp": "2024-01-15T20:30:00"
-}
-```
-
-### 生成音乐
+### 音乐生成API
 ```http
-POST /api/generate-music
-Content-Type: application/json
-
-{
-    "mansion": "角",
-    "element": "Wood",
-    "duration": 45,
-    "style": "cinematic, ethereal"
-}
+POST /api/music/generate?instrument=Piano&mode=Major&duration=45
 ```
 
-### 获取所有星宿信息
-```http
-GET /api/mansions
-```
-
-### 健康检查
-```http
-GET /api/health
-```
-
-## 🎨 使用指南
-
-### 1. 时间选择
-- 使用古典青铜环界面选择时间
-- 四层嵌套环：年、月、日、时辰
-- 支持拖拽滑动和点击选择
-- 显示传统天干地支和现代时间
-
-### 2. 位置选择
-- 点击3D地球模型选择观测位置
-- 支持拖拽旋转查看不同区域
-- 精确获取经纬度坐标
-- 显示主要城市标记
-
-### 3. 星图查看
-- 基于选定时间和位置的真实星空
-- 完整的二十八星宿标注和连线
-- 四象颜色区分（青龙、朱雀、白虎、玄武）
-- 月亮位置实时高亮显示
-- 星等系统显示恒星亮度
-
-### 4. 音乐生成
-- 自动计算月亮在二十八星宿中的位置
-- 基于五行理论生成音乐参数
-- 构建专业音乐提示词
-- 调用API生成45秒完整音乐作品
-- 支持在线播放和下载
-
-## ⚙️ 配置说明
-
-### 主要配置参数
-
-```python
-# backend_app.py 中的配置
-MUSIC_API_URL = "https://yue-inst.ngrok.app"
-DEFAULT_LATITUDE = 22.3964   # 香港
-DEFAULT_LONGITUDE = 114.1095
-SERVER_PORT = 8000
-CORS_ORIGINS = ["*"]
-```
-
-### 音乐生成参数
-
-```python
-# generation.py 中的配置
-MUSIC_API_CONFIG = {
-    "base_url": "https://yue-inst.ngrok.app",
-    "timeout": 120,
-    "max_retries": 2,
-    "retry_delay": 3
-}
-```
-
-## 🔍 故障排除
-
-### 常见问题解决
-
-**1. 端口被占用**
-```bash
-# 查看端口占用
-netstat -ano | findstr :8000  # Windows
-lsof -i :8000                 # macOS/Linux
-
-# 或修改backend_app.py中的端口号
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8001)
-```
-
-**2. 依赖安装失败**
-```bash
-# 升级pip
-python -m pip install --upgrade pip
-
-# 使用国内镜像源
-pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
-
-# 或使用conda
-conda install --file requirements.txt
-```
-
-**3. 音乐生成超时或失败**
-- 检查网络连接状态
-- 确认 `https://yue-inst.ngrok.app` 服务可用
-- 查看控制台错误日志
-- 尝试减少音乐时长 (duration)
-
-**4. 天文计算错误**
-```python
-# 检查时间格式 (必须是ISO 8601格式)
-"2024-01-15T20:30:00"  # 正确
-"2024/01/15 20:30:00"  # 错误
-
-# 检查经纬度范围
-latitude: -90 到 90
-longitude: -180 到 180
-```
-
-**5. 前端页面无法访问**
-- 确认后端服务已启动
-- 检查防火墙设置
-- 尝试访问 `http://127.0.0.1:8000/static/index.html`
-
-## 🌟 技术栈
-
-### 后端技术
-- **FastAPI** - 现代Python Web框架
-- **Astropy** - 专业天文计算库
-- **Requests** - HTTP客户端
-- **Uvicorn** - ASGI服务器
-- **Pydantic** - 数据验证和序列化
-
-### 前端技术
-- **HTML5/CSS3** - 现代Web标准
-- **JavaScript ES6+** - 原生JavaScript
-- **Three.js** - 3D渲染引擎
-- **WebGL** - 硬件加速渲染
-
-### 核心算法
-- **月亮位置计算** - 基于JPL DE405星历表
-- **坐标系转换** - 赤道坐标系到黄道坐标系
-- **五行映射** - 传统中国天文学理论
-- **音乐参数生成** - 基于教会调式理论
-
-## 📊 系统架构
-
-```
-┌─────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   用户界面   │ -> │   FastAPI后端    │ -> │   天文计算模块   │
-│  (Web前端)  │    │  (API路由)      │    │  (astronomy.py) │
-└─────────────┘    └──────────────────┘    └─────────────────┘
-                            │                        │
-                            v                        v
-┌─────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   音乐输出   │ <- │   音乐生成API    │ <- │   五行映射模块   │
-│  (45秒音频)  │    │ (外部ngrok服务)  │    │  (wuxing.py)   │
-└─────────────┘    └──────────────────┘    └─────────────────┘
-```
-
-## 🔄 数据流程
-
-1. **用户输入** → 时间 + 地理位置
-2. **天文计算** → 月亮黄经位置
-3. **星宿判定** → 确定二十八星宿
-4. **五行映射** → 星宿转换为五行元素
-5. **参数生成** → 五行转换为音乐参数
-6. **提示词构建** → 生成音乐创作指令
-7. **API调用** → 请求音乐生成服务
-8. **音乐输出** → 返回音频文件
+更多API详情请访问：`http://localhost:8000/docs`
 
 ## 🤝 贡献指南
 
-1. Fork 本项目
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+我们欢迎各种形式的贡献！
+
+### 如何贡献
+1. Fork 这个项目
+2. 创建你的特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交你的修改 (`git commit -m 'Add some AmazingFeature'`)
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启 Pull Request
+5. 打开一个 Pull Request
 
-### 代码规范
-- 遵循 PEP 8 Python代码规范
-- 添加适当的注释和文档字符串
-- 编写单元测试
-- 更新相关文档
+### 贡献领域
+- 🐛 Bug修复和性能优化
+- ✨ 新功能开发
+- 📚 文档完善
+- 🎨 UI/UX改进
+- 🧪 测试覆盖
+- 🌍 国际化支持
 
-## 📈 性能优化
+## 📝 开发路线图
 
-### 计算缓存
-- 天文计算结果缓存 (1小时)
-- 音乐参数映射缓存
-- 静态资源CDN加速
+### v2.0 (计划中)
+- [ ] 更多星宿系统支持（西方星座）
+- [ ] 音乐风格扩展（民族音乐、现代音乐）
+- [ ] 移动端优化
+- [ ] 用户系统和作品保存
 
-### 并发处理
-- 异步API调用
-- 多线程天文计算
-- 连接池管理
+### v3.0 (远期规划)
+- [ ] 机器学习优化音乐生成
+- [ ] 实时音乐演奏功能
+- [ ] 社区分享平台
+- [ ] VR/AR体验
 
-## 🔒 安全考虑
+## 🏆 致谢
 
-- API请求频率限制
-- 输入参数验证
-- 错误信息脱敏
-- CORS跨域配置
+### 技术支持
+- [Astropy](https://www.astropy.org/) - 天文计算
+- [FastAPI](https://fastapi.tiangolo.com/) - Web框架
+- [Three.js](https://threejs.org/) - 3D图形渲染
 
-## 📜 许可证
+### 文化顾问
+- 中国传统天文学研究团队
+- 五行音乐理论专家
+- 文化遗产保护组织
 
-本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件
+### 特别感谢
+感谢所有为传统文化传承和现代技术融合做出贡献的开发者和研究者。
 
-## 📞 联系方式
+## 📄 许可证
 
-- 项目维护者：[您的姓名]
-- 邮箱：[您的邮箱]
-- 项目地址：[项目GitHub链接]
+本项目基于 [MIT License](LICENSE) 开源协议。
 
-## 🙏 致谢
+## 📞 联系我们
 
-- 感谢中国传统天文学的古代智慧
-- 感谢 Astropy 天文计算库的开发团队
-- 感谢 FastAPI 框架的优秀设计
-- 感谢所有贡献者和测试用户
-- 特别感谢香港科技大学的学术支持
-
-## 📚 参考资料
-
-- [中国古代二十八星宿](https://zh.wikipedia.org/wiki/二十八宿)
-- [五行学说](https://zh.wikipedia.org/wiki/五行)
-- [FastAPI 官方文档](https://fastapi.tiangolo.com/)
-- [Astropy 天文计算](https://www.astropy.org/)
-- [Three.js 3D库](https://threejs.org/)
+- **项目主页**: [GitHub](https://github.com/CZA1006/Celestial-Music-HKUST)
+- **问题反馈**: [Issues](https://github.com/CZA1006/Celestial-Music-HKUST/issues)
+- **讨论交流**: [Discussions](https://github.com/CZA1006/Celestial-Music-HKUST/discussions)
 
 ---
 
-*让古代天文智慧与现代音乐技术完美融合，创造独特的艺术体验* ✨
+<div align="center">
 
-## 🌟 更新日志
+**让古老的智慧奏响现代的乐章** 🌟
 
-### v1.0.0 (2024-01-15)
-- ✅ 实现基础天文计算功能
-- ✅ 完成二十八星宿映射系统
-- ✅ 集成音乐生成API
-- ✅ 构建青铜环用户界面
-- ✅ 添加3D地球位置选择
-- ✅ 实现星图可视化显示
+如果这个项目对您有帮助，请给我们一个 ⭐️ Star！
 
-### 计划中的功能
-- 🔄 音乐风格自定义
-- 🔄 历史音乐作品保存
-- 🔄 社交分享功能
-- 🔄 多语言界面支持
-- 🔄 移动端原生应用
-
-## 📋 Requirements.txt
-
-```
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
-astropy==5.3.4
-requests==2.31.0
-pydantic==2.5.0
-python-multipart==0.0.6
-pytz==2023.3
-```
-
-## 🛠️ 开发环境设置
-
-### VS Code 推荐插件
-- Python
-- Python Docstring Generator
-- GitLens
-- Prettier
-- Live Server
-
-### 开发服务器
-```bash
-# 开发模式启动（自动重载）
-uvicorn backend_app:app --reload --host 0.0.0.0 --port 8000
-
-# 生产模式启动
-gunicorn backend_app:app -w 4 -k uvicorn.workers.UvicornWorker
-```
-
-### Docker 部署
-```dockerfile
-FROM python:3.9-slim
-
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
-COPY . .
-EXPOSE 8000
-
-CMD ["uvicorn", "backend_app:app", "--host", "0.0.0.0", "--port", "8000"]
-```
-
-## 🧪 测试
-
-### 运行测试
-```bash
-# 安装测试依赖
-pip install pytest pytest-asyncio httpx
-
-# 运行所有测试
-pytest
-
-# 运行特定测试
-pytest tests/test_astronomy.py
-
-# 生成测试覆盖率报告
-pytest --cov=modules tests/
-```
-
-### 测试示例
-```python
-# tests/test_astronomy.py
-import pytest
-from modules.astronomy import calc_mansion
-
-def test_calc_mansion():
-    result = calc_mansion("2024-01-15T20:30:00", 22.3964, 114.1095)
-    assert result["mansion"] in ["角", "亢", "氐", "房", "心", "尾", "箕"]
-    assert result["element"] in ["Wood", "Fire", "Earth", "Metal", "Water"]
-```
+</div>
