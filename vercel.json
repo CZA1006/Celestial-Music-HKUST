@@ -1,14 +1,12 @@
 {
-  "functions": {
-    "frontend/*.html": {
-      "runtime": "@vercel/static"
-    }
-  },
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/location", "destination": "/frontend/location.html" },
+    { "source": "/starmap", "destination": "/frontend/starmap.html" }
+  ],
   "routes": [
-    { "src": "/", "dest": "/frontend/index.html" },
     { "src": "/location", "dest": "/frontend/location.html" },
     { "src": "/starmap", "dest": "/frontend/starmap.html" },
-    { "src": "/config.js", "dest": "/frontend/config.js" },
     { "src": "/(.*)", "dest": "/frontend/$1" }
   ]
 }
