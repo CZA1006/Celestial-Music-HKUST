@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>位置选择器 - 28星宿天体音乐生成器</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0c0c1e 0%, #1a1a3e 50%, #2d2d5f 100%);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .step.completed {
+            background: linear-gradient(45deg, #4ade80, #22c55e);
+            color: white;
+        }
+
+        .step.active {
+            background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+            color: white;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+
+        .step.inactive {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .step-line {
+            width: 60px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .step-line.completed {
+            background: linear-gradient(90deg, #4ade80, #22c55e);
+        }
+
+        #earthCanvas {
+            border-radius: 50%;
+            cursor: grab;
+            transition: transform 0.3s ease;
+        }
+
+        #earthCanvas:active {
+            cursor: grabbing;
+        }
+
+        #earthCanvas:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+        }
+
+        .city-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 8px 16px;
+            color: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .city-btn:hover {
+            background: rgba(59, 130, 246, 0.3);
+            border-color: rgba(59, 130, 246, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .city-btn.selected {
+            background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+            border-color: #3b82f6;
+        }
+
+        .coord-display {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 12px;
+            margin: 8px 0;
+            border-left: 3px solid #3b82f6;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #10b981, #059669);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 12px 24px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 12px 24px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                padding: 20px;
+            }
+            
+            .glass-panel {
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 星空背景 -->
+    <div class="stars" id="stars"></div>
+
+    <div class="relative z-10 min-h-screen flex flex-col">
+        <!-- 步骤指示器 -->
+        <div class="step-indicator mt-8">
+            <div class="step completed">1</div>
+            <div class="step-line completed"></div>
+            <div class="step active">2</div>
+            <div class="step-line inactive"></div>
+            <div class="step inactive">3</div>
+        </div>
+
+        <!-- 标题 -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-white mb-2">选择观测位置</h1>
+            <p class="text-gray-300">在地球上选择您的观测位置</p>
+        </div>
+
+        <!-- 主要内容区域 -->
+        <div class="flex-1 flex justify-center items-start px-8">
+            <div class="container flex gap-8 max-w-7xl w-full">
+                <!-- 左侧面板 -->
+                <div class="glass-panel p-6 w-80">
+                    <!-- 已选择时间 -->
+                    <div class="mb-6">
+                        <div class="flex items-center mb-3">
+                            <i class="fas fa-clock text-blue-400 mr-2"></i>
+                            <span class="text-white font-semibold">已选择时间</span>
+                        </div>
+                        <div class="bg-gray-800 rounded-lg p-3">
+                            <div class="text-white font-mono" id="selectedTime">加载中...</div>
+                            <div class="text-gray-400 text-sm mt-1" id="timeDetails">等待数据加载</div>
+                        </div>
+                    </div>
+
+                    <!-- 快速选择 -->
+                    <div class="mb-6">
+                        <div class="flex items-center mb-3">
+                            <i class="fas fa-map-marker-alt text-blue-400 mr-2"></i>
+                            <span class="text-white font-semibold">快速选择</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button class="city-btn" data-city="beijing">北京</button>
+                            <button class="city-btn" data-city="shanghai">上海</button>
+                            <button class="city-btn" data-city="guangzhou">广州</button>
+                            <button class="city-btn" data-city="shenzhen">深圳</button>
+                            <button class="city-btn" data-city="hongkong">香港</button>
+                            <button class="city-btn" data-city="taipei">台北</button>
+                            <button class="city-btn" data-city="newyork">纽约</button>
+                            <button class="city-btn" data-city="london">伦敦</button>
+                            <button class="city-btn" data-city="tokyo">东京</button>
+                            <button class="city-btn" data-city="paris">巴黎</button>
+                            <button class="city-btn" data-city="sydney">悉尼</button>
+                            <button class="city-btn" data-city="singapore">新加坡</button>
+                        </div>
+                    </div>
+
+                    <!-- 获取当前位置 -->
+                    <button class="btn-secondary mb-4" id="getCurrentLocation">
+                        <i class="fas fa-location-arrow mr-2"></i>
+                        获取当前位置
+                    </button>
+                </div>
+
+                <!-- 中央地球 -->
+                <div class="glass-panel p-6 flex-1">
+                    <div class="flex items-center justify-center mb-4">
+                        <i class="fas fa-globe text-blue-400 mr-2"></i>
+                        <span class="text-white font-semibold">地球选择器</span>
+                    </div>
+                    
+                    <div class="flex justify-center">
+                        <canvas id="earthCanvas" width="400" height="400"></canvas>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <p class="text-gray-300 text-sm">点击并拖拽地球来旋转视角</p>
+                        <p class="text-gray-400 text-xs">点击地球表面选择位置</p>
+                    </div>
+                </div>
+
+                <!-- 右侧面板 -->
+                <div class="glass-panel p-6 w-80">
+                    <!-- 当前位置 -->
+                    <div class="mb-6">
+                        <div class="flex items-center mb-3">
+                            <i class="fas fa-crosshairs text-yellow-400 mr-2"></i>
+                            <span class="text-white font-semibold">当前位置</span>
+                        </div>
+                    </div>
+
+                    <!-- 坐标显示 -->
+                    <div class="coord-display">
+                        <div class="text-gray-300 text-sm">经度 (Longitude):</div>
+                        <div class="text-white font-mono text-lg" id="longitude">114.0579°E</div>
+                    </div>
+
+                    <div class="coord-display">
+                        <div class="text-gray-300 text-sm">纬度 (Latitude):</div>
+                        <div class="text-white font-mono text-lg" id="latitude">22.5431°N</div>
+                    </div>
+
+                    <div class="coord-display">
+                        <div class="text-gray-300 text-sm">地点</div>
+                        <div class="text-white" id="locationName">深圳</div>
+                    </div>
+
+                    <div class="coord-display">
+                        <div class="text-gray-300 text-sm">状态</div>
+                        <div class="text-green-400" id="locationStatus">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            位置已选择
+                        </div>
+                    </div>
+
+                    <!-- 操作按钮 -->
+                    <div class="mt-8">
+                        <button class="btn-primary" id="confirmLocation">
+                            <i class="fas fa-arrow-right mr-2"></i>
+                            进入星图生成
+                        </button>
+                        <button class="btn-secondary" id="goBackToTime">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            返回时间选择
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let canvas, ctx;
+        let earthRadius = 180;
+        let rotation = { x: 0, y: 0 };
+        let isDragging = false;
+        let lastMousePos = { x: 0, y: 0 };
+        let selectedLocation = { lat: 22.5431, lng: 114.0579, name: "深圳", country: "中国" };
+
+        // 城市数据
+        const cities = {
+            beijing: { lat: 39.9042, lng: 116.4074, name: "北京", country: "中国" },
+            shanghai: { lat: 31.2304, lng: 121.4737, name: "上海", country: "中国" },
+            guangzhou: { lat: 23.1291, lng: 113.2644, name: "广州", country: "中国" },
+            shenzhen: { lat: 22.5431, lng: 114.0579, name: "深圳", country: "中国" },
+            hongkong: { lat: 22.3193, lng: 114.1694, name: "香港", country: "中国香港" },
+            taipei: { lat: 25.0330, lng: 121.5654, name: "台北", country: "中国台湾" },
+            newyork: { lat: 40.7128, lng: -74.0060, name: "纽约", country: "美国" },
+            london: { lat: 51.5074, lng: -0.1278, name: "伦敦", country: "英国" },
+            tokyo: { lat: 35.6762, lng: 139.6503, name: "东京", country: "日本" },
+            paris: { lat: 48.8566, lng: 2.3522, name: "巴黎", country: "法国" },
+            sydney: { lat: -33.8688, lng: 151.2093, name: "悉尼", country: "澳大利亚" },
+            singapore: { lat: 1.3521, lng: 103.8198, name: "新加坡", country: "新加坡" }
+        };
+
+        // 简化的大陆轮廓数据
+        const continents = [
+            // 亚洲主要轮廓
+            [
+                { lat: 70, lng: 100 }, { lat: 55, lng: 160 }, { lat: 35, lng: 140 },
+                { lat: 22, lng: 120 }, { lat: 10, lng: 105 }, { lat: 25, lng: 70 },
+                { lat: 40, lng: 50 }, { lat: 60, lng: 60 }, { lat: 70, lng: 100 }
+            ],
+            // 欧洲
+            [
+                { lat: 71, lng: 25 }, { lat: 60, lng: 5 }, { lat: 36, lng: 10 },
+                { lat: 40, lng: 40 }, { lat: 60, lng: 60 }, { lat: 71, lng: 25 }
+            ],
+            // 非洲
+            [
+                { lat: 37, lng: 10 }, { lat: 12, lng: 45 }, { lat: -35, lng: 20 },
+                { lat: -22, lng: 17 }, { lat: 5, lng: -17 }, { lat: 37, lng: 10 }
+            ],
+            // 北美洲
+            [
+                { lat: 70, lng: -140 }, { lat: 60, lng: -165 }, { lat: 25, lng: -110 },
+                { lat: 30, lng: -80 }, { lat: 45, lng: -60 }, { lat: 60, lng: -90 },
+                { lat: 70, lng: -140 }
+            ],
+            // 南美洲
+            [
+                { lat: 10, lng: -70 }, { lat: -20, lng: -40 }, { lat: -55, lng: -70 },
+                { lat: -30, lng: -80 }, { lat: 10, lng: -70 }
+            ],
+            // 澳大利亚
+            [
+                { lat: -10, lng: 130 }, { lat: -35, lng: 115 }, { lat: -40, lng: 145 },
+                { lat: -20, lng: 150 }, { lat: -10, lng: 130 }
+            ]
+        ];
+
+        // 初始化
+        function init() {
+            createStars();
+            initCanvas();
+            loadSelectedTime();
+            updateLocationDisplay();
+            bindEvents();
+            drawEarth();
+        }
+
+        // 创建星空背景
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 200; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // 初始化Canvas
+        function initCanvas() {
+            canvas = document.getElementById('earthCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // 设置高DPI支持
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = 400 * dpr;
+            canvas.height = 400 * dpr;
+            canvas.style.width = '400px';
+            canvas.style.height = '400px';
+            ctx.scale(dpr, dpr);
+        }
+
+        // 加载已选择的时间
+        function loadSelectedTime() {
+            try {
+                const timeData = JSON.parse(sessionStorage.getItem('selectedTime'));
+                if (timeData) {
+                    document.getElementById('selectedTime').textContent = 
+                        `${timeData.year}年${timeData.month}月${timeData.day}日 ${timeData.hour}:00`;
+                    document.getElementById('timeDetails').textContent = 
+                        `时间戳: ${timeData.year}-${String(timeData.month).padStart(2, '0')}-${String(timeData.day).padStart(2, '0')}T${String(timeData.hour).padStart(2, '0')}:00:00Z`;
+                } else {
+                    document.getElementById('selectedTime').textContent = '未选择时间';
+                    document.getElementById('timeDetails').textContent = '请先选择时间';
+                }
+            } catch (e) {
+                console.error('加载时间数据失败:', e);
+            }
+        }
+
+        // 更新位置显示
+        function updateLocationDisplay() {
+            const lngText = selectedLocation.lng >= 0 ? 
+                `${selectedLocation.lng.toFixed(4)}°E` : 
+                `${Math.abs(selectedLocation.lng).toFixed(4)}°W`;
+            const latText = selectedLocation.lat >= 0 ? 
+                `${selectedLocation.lat.toFixed(4)}°N` : 
+                `${Math.abs(selectedLocation.lat).toFixed(4)}°S`;
+            
+            document.getElementById('longitude').textContent = lngText;
+            document.getElementById('latitude').textContent = latText;
+            document.getElementById('locationName').textContent = selectedLocation.name;
+        }
+
+        // 绑定事件
+        function bindEvents() {
+            // 城市按钮事件
+            document.querySelectorAll('.city-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const cityKey = btn.dataset.city;
+                    selectCity(cityKey);
+                    
+                    // 更新按钮状态
+                    document.querySelectorAll('.city-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                });
+            });
+
+            // Canvas鼠标事件
+            canvas.addEventListener('mousedown', handleMouseDown);
+            canvas.addEventListener('mousemove', handleMouseMove);
+            canvas.addEventListener('mouseup', handleMouseUp);
+            canvas.addEventListener('mouseleave', handleMouseUp);
+            canvas.addEventListener('click', handleCanvasClick);
+
+            // 触摸事件
+            canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+            canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+            canvas.addEventListener('touchend', handleTouchEnd);
+
+            // 获取当前位置
+            document.getElementById('getCurrentLocation').addEventListener('click', getCurrentLocation);
+
+            // 确认位置
+            document.getElementById('confirmLocation').addEventListener('click', confirmLocation);
+
+            // 返回时间选择
+            document.getElementById('goBackToTime').addEventListener('click', () => {
+                window.location.href = '/';
+            });
+        }
+
+        // 选择城市
+        function selectCity(cityKey) {
+            if (cities[cityKey]) {
+                selectedLocation = { ...cities[cityKey] };
+                updateLocationDisplay();
+                drawEarth();
+            }
+        }
+
+        // 鼠标事件处理
+        function handleMouseDown(e) {
+            isDragging = true;
+            const rect = canvas.getBoundingClientRect();
+            lastMousePos = {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        }
+
+        function handleMouseMove(e) {
+            if (!isDragging) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const currentPos = {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+            
+            const deltaX = currentPos.x - lastMousePos.x;
+            const deltaY = currentPos.y - lastMousePos.y;
+            
+            rotation.y += deltaX * 0.01;
+            rotation.x -= deltaY * 0.01;
+            
+            // 限制X轴旋转
+            rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, rotation.x));
+            
+            lastMousePos = currentPos;
+            drawEarth();
+        }
+
+        function handleMouseUp() {
+            isDragging = false;
+        }
+
+        // 触摸事件处理
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            isDragging = true;
+            lastMousePos = {
+                x: touch.clientX - rect.left,
+                y: touch.clientY - rect.top
+            };
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            if (!isDragging) return;
+            
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const currentPos = {
+                x: touch.clientX - rect.left,
+                y: touch.clientY - rect.top
+            };
+            
+            const deltaX = currentPos.x - lastMousePos.x;
+            const deltaY = currentPos.y - lastMousePos.y;
+            
+            rotation.y += deltaX * 0.01;
+            rotation.x -= deltaY * 0.01;
+            
+            rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, rotation.x));
+            
+            lastMousePos = currentPos;
+            drawEarth();
+        }
+
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            isDragging = false;
+        }
+
+        // Canvas点击事件
+        function handleCanvasClick(e) {
+            if (isDragging) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left - 200; // 中心点偏移
+            const y = e.clientY - rect.top - 200;
+            
+            // 检查是否点击在地球上
+            const distance = Math.sqrt(x*x + y*y);
+            if (distance <= earthRadius) {
+                const coords = getLatLngFromClick(x, y);
+                if (coords) {
+                    selectedLocation = {
+                        lat: coords.lat,
+                        lng: coords.lng,
+                        name: "自定义位置",
+                        country: "未知"
+                    };
+                    updateLocationDisplay();
+                    drawEarth();
+                    
+                    // 取消城市按钮选择
+                    document.querySelectorAll('.city-btn').forEach(b => b.classList.remove('selected'));
+                }
+            }
+        }
+
+        // 从点击位置计算经纬度
+        function getLatLngFromClick(x, y) {
+            const distance = Math.sqrt(x*x + y*y);
+            if (distance > earthRadius) return null;
+            
+            // 简化的球面投影计算
+            const normalizedX = x / earthRadius;
+            const normalizedY = y / earthRadius;
+            
+            // 计算球面坐标
+            const z = Math.sqrt(1 - normalizedX*normalizedX - normalizedY*normalizedY);
+            
+            // 应用旋转
+            const rotatedX = normalizedX * Math.cos(rotation.y) - z * Math.sin(rotation.y);
+            const rotatedZ = normalizedX * Math.sin(rotation.y) + z * Math.cos(rotation.y);
+            const rotatedY = normalizedY * Math.cos(rotation.x) - rotatedZ * Math.sin(rotation.x);
+            
+            // 转换为经纬度
+            const lat = Math.asin(rotatedY) * 180 / Math.PI;
+            const lng = Math.atan2(rotatedX, Math.sqrt(rotatedY*rotatedY + rotatedZ*rotatedZ)) * 180 / Math.PI;
+            
+            return { lat, lng };
+        }
+
+        // 获取当前位置
+        function getCurrentLocation() {
+            if (!navigator.geolocation) {
+                alert('您的浏览器不支持地理位置获取');
+                return;
+            }
+            
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    selectedLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                        name: "当前位置",
+                        country: "未知"
+                    };
+                    updateLocationDisplay();
+                    drawEarth();
+                    
+                    document.querySelectorAll('.city-btn').forEach(b => b.classList.remove('selected'));
+                },
+                (error) => {
+                    console.error('获取位置失败:', error);
+                    alert('无法获取当前位置，请检查位置权限设置');
+                }
+            );
+        }
+
+        // 绘制地球
+        function drawEarth() {
+            ctx.clearRect(0, 0, 400, 400);
+            
+            const centerX = 200;
+            const centerY = 200;
+            
+            // 绘制地球背景
+            const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, earthRadius);
+            gradient.addColorStop(0, '#4A90E2');
+            gradient.addColorStop(0.7, '#2E5BBA');
+            gradient.addColorStop(1, '#1E3A8A');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, earthRadius, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // 绘制大陆
+            ctx.fillStyle = '#10B981';
+            continents.forEach(continent => {
+                ctx.beginPath();
+                let first = true;
+                continent.forEach(point => {
+                    const projected = projectPoint(point.lat, point.lng);
+                    if (projected && projected.visible) {
+                        if (first) {
+                            ctx.moveTo(projected.x, projected.y);
+                            first = false;
+                        } else {
+                            ctx.lineTo(projected.x, projected.y);
+                        }
+                    }
+                });
+                ctx.closePath();
+                ctx.fill();
+            });
+            
+            // 绘制经纬网格
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.lineWidth = 1;
+            
+            // 经线
+            for (let lng = -180; lng <= 180; lng += 30) {
+                ctx.beginPath();
+                let first = true;
+                for (let lat = -90; lat <= 90; lat += 5) {
+                    const projected = projectPoint(lat, lng);
+                    if (projected && projected.visible) {
+                        if (first) {
+                            ctx.moveTo(projected.x, projected.y);
+                            first = false;
+                        } else {
+                            ctx.lineTo(projected.x, projected.y);
+                        }
+                    }
+                }
+                ctx.stroke();
+            }
+            
+            // 纬线
+            for (let lat = -90; lat <= 90; lat += 30) {
+                ctx.beginPath();
+                let first = true;
+                for (let lng = -180; lng <= 180; lng += 5) {
+                    const projected = projectPoint(lat, lng);
+                    if (projected && projected.visible) {
+                        if (first) {
+                            ctx.moveTo(projected.x, projected.y);
+                            first = false;
+                        } else {
+                            ctx.lineTo(projected.x, projected.y);
+                        }
+                    }
+                }
+                ctx.stroke();
+            }
+            
+            // 绘制选择的位置标记
+            const selectedProjected = projectPoint(selectedLocation.lat, selectedLocation.lng);
+            if (selectedProjected && selectedProjected.visible) {
+                ctx.fillStyle = '#EF4444';
+                ctx.beginPath();
+                ctx.arc(selectedProjected.x, selectedProjected.y, 6, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+            
+            // 绘制地球边缘高光
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, earthRadius, 0, 2 * Math.PI);
+            ctx.stroke();
+        }
+
+        // 投影点到2D平面
+        function projectPoint(lat, lng) {
+            const latRad = lat * Math.PI / 180;
+            const lngRad = lng * Math.PI / 180;
+            
+            // 球面坐标
+            let x = Math.cos(latRad) * Math.sin(lngRad);
+            let y = Math.sin(latRad);
+            let z = Math.cos(latRad) * Math.cos(lngRad);
+            
+            // 应用旋转
+            const rotatedX = x * Math.cos(rotation.y) - z * Math.sin(rotation.y);
+            const rotatedZ = x * Math.sin(rotation.y) + z * Math.cos(rotation.y);
+            const rotatedY = y * Math.cos(rotation.x) - rotatedZ * Math.sin(rotation.x);
+            const finalZ = y * Math.sin(rotation.x) + rotatedZ * Math.cos(rotation.x);
+            
+            // 检查是否在可见半球
+            if (finalZ < 0) return { visible: false };
+            
+            // 投影到2D
+            const screenX = 200 + rotatedX * earthRadius;
+            const screenY = 200 - rotatedY * earthRadius;
+            
+            return {
+                x: screenX,
+                y: screenY,
+                visible: true
+            };
+        }
+
+        // 确认位置选择
+        function confirmLocation() {
+            try {
+                const timeData = JSON.parse(sessionStorage.getItem('selectedTime'));
+                if (!timeData) {
+                    alert('请先选择时间');
+                    window.location.href = '/';
+                    return;
+                }
+                
+                const locationData = {
+                    latitude: selectedLocation.lat,
+                    longitude: selectedLocation.lng,
+                    address: selectedLocation.name,
+                    country: selectedLocation.country
+                };
+                
+                // 保存位置数据
+                sessionStorage.setItem('selectedLocation', JSON.stringify(locationData));
+                
+                // 跳转到星图页面
+                window.location.href = '/starmap';
+                
+            } catch (e) {
+                console.error('保存位置数据失败:', e);
+                alert('保存位置数据失败，请重试');
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
