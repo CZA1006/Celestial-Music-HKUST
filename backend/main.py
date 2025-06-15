@@ -6,16 +6,7 @@ from typing import Optional
 import logging
 import os
 from datetime import datetime
-
-# 导入自定义模块
-try:
-    from modules.astronomy import calc_mansion, get_all_mansions_positions, get_moon_position
-    from modules.wuxing import get_element
-    from modules.mapping import get_full_music_config
-    from modules.generation import generate_music
-except ImportError as e:
-    print(f"模块导入错误: {e}")
-    exit(1)
+import random
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -31,11 +22,15 @@ app = FastAPI(
 # CORS中间件
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 部署后改为具体域名
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 简化的星宿数据
+MANSIONS = ["角", "亢", "氐", "房", "心", "尾", "箕", "斗", "牛", "女", "虚", "危", "室", "壁", "奎", "娄", "胃", "昴", "毕", "觜", "参", "井", "鬼", "柳", "星", "张", "翼", "轸"]
+ELEMENTS = {"角": "Wood", "心": "Fire", "昴": "Metal", "斗": "Water", "井": "Fire"}
 
 # 数据模型
 class TimeSelection(BaseModel):
@@ -59,7 +54,8 @@ async def root():
     return {
         "message": "28星宿天体音乐生成器 API",
         "version": "2.1.0",
-        "status": "running"
+        "status": "running",
+        "docs": "/docs"
     }
 
 @app.get("/api/health")
@@ -72,29 +68,28 @@ async def health_check():
 @app.post("/api/astronomy/calculate")
 async def calculate_astronomy(request: AstronomyRequest):
     try:
+        # 模拟天文计算
         dt = datetime(
             request.time_data.year,
             request.time_data.month,
             request.time_data.day,
             request.time_data.hour
         )
-        timestamp = dt.timestamp()
         
-        moon_pos = get_moon_position(
-            timestamp, 
-            request.location_data.latitude, 
-            request.location_data.longitude
-        )
+        # 简单的星宿计算（基于时间hash）
+        mansion_index = (dt.day + dt.hour) % len(MANSIONS)
+        current_mansion = MANSIONS[mansion_index]
+        element = ELEMENTS.get(current_mansion, "Wood")
+        ecliptic_lon = (dt.day * 12.5 + dt.hour * 15) % 360
         
-        if 'ecliptic_longitude' not in moon_pos:
-            if 'longitude' in moon_pos:
-                moon_pos['ecliptic_longitude'] = moon_pos['longitude']
-            else:
-                raise ValueError("无法获取月亮黄经数据")
+        # 模拟音乐配置
+        instruments = {"Wood": "Strings", "Fire": "Trumpet", "Metal": "Bells", "Water": "Flute", "Earth": "Piano"}
+        modes = {"Wood": "Dorian", "Fire": "Phrygian", "Metal": "Lydian", "Water": "Aeolian", "Earth": "Ionian"}
         
-        current_mansion = calc_mansion(moon_pos['ecliptic_longitude'])
-        element = get_element(current_mansion)
-        music_config = get_full_music_config(current_mansion)
+        music_config = {
+            "instrument": instruments.get(element, "Piano"),
+            "mode": modes.get(element, "Major")
+        }
         
         return {
             "success": True,
@@ -104,21 +99,20 @@ async def calculate_astronomy(request: AstronomyRequest):
                 "longitude": request.location_data.longitude,
                 "address": request.location_data.address
             },
-            "moon_position": moon_pos,
             "current_mansion": current_mansion,
             "element": element,
-            "ecliptic_longitude": moon_pos['ecliptic_longitude'],
+            "ecliptic_longitude": ecliptic_lon,
             "music_config": music_config,
             "timestamp": dt.isoformat(),
             "mansion": current_mansion,
-            "moon_ecliptic_lon": moon_pos['ecliptic_longitude'],
-            "instrument": music_config.get('instrument', 'Piano'),
-            "mode": music_config.get('mode', 'Major')
+            "moon_ecliptic_lon": ecliptic_lon,
+            "instrument": music_config["instrument"],
+            "mode": music_config["mode"]
         }
         
     except Exception as e:
-        logger.error(f"天文计算失败: {str(e)}")
-        raise HTTPException(status_code=400, detail=f"天文计算失败: {str(e)}")
+        logger.error(f"计算失败: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"计算失败: {str(e)}")
 
 @app.post("/api/music/generate")
 async def generate_music_api(
@@ -128,29 +122,23 @@ async def generate_music_api(
     duration: int = Query(default=45, description="音乐时长")
 ):
     try:
-        dt = datetime.now()
-        timestamp = dt.timestamp()
+        # 模拟音乐生成
+        current_mansion = random.choice(MANSIONS)
+        element = ELEMENTS.get(current_mansion, "Wood")
         
-        moon_pos = get_moon_position(timestamp, 22.3193, 114.1694)
-        if 'ecliptic_longitude' not in moon_pos:
-            moon_pos['ecliptic_longitude'] = moon_pos.get('longitude', 0)
-        
-        current_mansion = calc_mansion(moon_pos['ecliptic_longitude'])
-        element = get_element(current_mansion)
-        
-        music_result = generate_music(
-            instrument=instrument,
-            mode=mode,
-            style=style,
-            duration=duration
-        )
+        # 模拟音乐结果
+        music_result = {
+            "success": True,
+            "id": f"music_{random.randint(1000000, 9999999)}",
+            "message": "音乐生成成功（演示版本）"
+        }
         
         return {
             "success": True,
             "astronomy": {
                 "mansion": current_mansion,
                 "element": element,
-                "moon_ecliptic_lon": moon_pos['ecliptic_longitude']
+                "moon_ecliptic_lon": random.uniform(0, 360)
             },
             "parameters": {
                 "element": element,
