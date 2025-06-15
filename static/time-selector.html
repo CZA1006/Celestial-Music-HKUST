@@ -47,8 +47,8 @@
         
         .sundial-container {
             position: relative;
-            width: 500px;
-            height: 500px;
+            width: 600px;
+            height: 600px;
             margin: 0 auto;
         }
         
@@ -146,10 +146,10 @@
         </div>
         
         <!-- 主容器 -->
-        <div class="glass-container p-8 max-w-2xl w-full">
+        <div class="glass-container p-8 max-w-4xl w-full">
             <!-- 日晷容器 -->
             <div class="sundial-container">
-                <canvas id="sundialCanvas" width="500" height="500"></canvas>
+                <canvas id="sundialCanvas" width="600" height="600"></canvas>
             </div>
             
             <!-- 信息显示 -->
@@ -186,10 +186,10 @@
         
         // 圆环配置
         const rings = {
-            year: { radius: 220, width: 30, min: 1950, max: 2025, current: 1950, angle: 0 },
-            month: { radius: 170, width: 25, min: 1, max: 12, current: 1, angle: 0 },
-            day: { radius: 120, width: 20, min: 1, max: 31, current: 1, angle: 0 },
-            hour: { radius: 70, width: 15, min: 0, max: 23, current: 0, angle: 0 }
+            year: { radius: 240, width: 28, min: 1950, max: 2025, current: 1950, angle: 0 },
+            month: { radius: 190, width: 25, min: 1, max: 12, current: 1, angle: 0 },
+            day: { radius: 140, width: 20, min: 1, max: 31, current: 1, angle: 0 },
+            hour: { radius: 90, width: 15, min: 0, max: 23, current: 0, angle: 0 }
         };
         
         // 拖拽状态
@@ -245,12 +245,12 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
             // 绘制背景圆
-            const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 250);
+            const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 280);
             gradient.addColorStop(0, 'rgba(139, 69, 19, 0.3)');
             gradient.addColorStop(1, 'rgba(160, 82, 45, 0.1)');
             ctx.fillStyle = gradient;
             ctx.beginPath();
-            ctx.arc(centerX, centerY, 240, 0, Math.PI * 2);
+            ctx.arc(centerX, centerY, 270, 0, Math.PI * 2);
             ctx.fill();
             
             // 绘制各个圆环
@@ -259,8 +259,8 @@
             drawRing('day', '日期', '#F4A460');
             drawRing('hour', '小时', '#DAA520');
             
-            // 绘制中心指针
-            drawPointer();
+            // 绘制中心地球
+            drawEarth();
         }
         
         // 绘制单个圆环
@@ -306,8 +306,8 @@
                 
                 const x1 = centerX + Math.cos(radian) * (radius - 15);
                 const y1 = centerY + Math.sin(radian) * (radius - 15);
-                const x2 = centerX + Math.cos(radian) * (radius + 5);
-                const y2 = centerY + Math.sin(radian) * (radius + 5);
+                const x2 = centerX + Math.cos(radian) * (radius + 8);
+                const y2 = centerY + Math.sin(radian) * (radius + 8);
                 
                 ctx.beginPath();
                 ctx.moveTo(x1, y1);
@@ -338,48 +338,145 @@
             ctx.fill();
         }
         
-        // 绘制数值
+        // 绘制数值 - 将数字放在圆环间隙中
         function drawValues(type, radius) {
             const ring = rings[type];
-            const tickCount = Math.min(ring.max - ring.min + 1, 12); // 限制显示数量
+            let tickCount, step, textRadius;
             
-            ctx.fillStyle = 'white';
-            ctx.font = '12px Arial';
+            // 计算数字应该显示的位置 - 在圆环间隙中
+            switch(type) {
+                case 'year':
+                    tickCount = 8;
+                    step = Math.floor((ring.max - ring.min) / (tickCount - 1));
+                    textRadius = radius + 15; // 年份圆环外侧间隙
+                    break;
+                case 'month':
+                    tickCount = 12;
+                    step = 1;
+                    textRadius = (rings.year.radius + rings.month.radius) / 2; // 年份和月份圆环中间
+                    break;
+                case 'day':
+                    tickCount = Math.min(getDaysInMonth(), 12);
+                    step = Math.ceil(getDaysInMonth() / tickCount);
+                    textRadius = (rings.month.radius + rings.day.radius) / 2; // 月份和日期圆环中间
+                    break;
+                case 'hour':
+                    tickCount = 8;
+                    step = 3;
+                    textRadius = (rings.day.radius + rings.hour.radius) / 2; // 日期和小时圆环中间
+                    break;
+            }
+            
+            // 设置文字样式
+            ctx.font = 'bold 16px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             
             for (let i = 0; i < tickCount; i++) {
-                const value = ring.min + Math.floor((i / (tickCount - 1)) * (ring.max - ring.min));
+                let value;
+                if (type === 'year') {
+                    value = ring.min + i * step;
+                } else if (type === 'month') {
+                    value = i + 1;
+                } else if (type === 'day') {
+                    value = Math.min(1 + i * step, getDaysInMonth());
+                } else {
+                    value = i * step;
+                }
+                
                 const angle = (i / (tickCount - 1)) * 360 - 90;
                 const radian = (angle * Math.PI) / 180;
                 
-                const textRadius = radius + 25;
                 const x = centerX + Math.cos(radian) * textRadius;
                 const y = centerY + Math.sin(radian) * textRadius;
                 
+                // 绘制文字阴影/描边
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+                ctx.lineWidth = 3;
+                ctx.strokeText(value.toString(), x, y);
+                
+                // 绘制白色文字
+                ctx.fillStyle = 'white';
                 ctx.fillText(value.toString(), x, y);
             }
         }
         
-        // 绘制中心指针
-        function drawPointer() {
-            const gradient = ctx.createLinearGradient(centerX, centerY - 40, centerX, centerY + 40);
-            gradient.addColorStop(0, '#FFD700');
-            gradient.addColorStop(1, '#FFA500');
+        // 绘制中心地球
+        function drawEarth() {
+            const earthRadius = 35;
             
-            ctx.fillStyle = gradient;
+            // 绘制地球主体 - 蓝色海洋
+            const oceanGradient = ctx.createRadialGradient(
+                centerX - 10, centerY - 10, 0,
+                centerX, centerY, earthRadius
+            );
+            oceanGradient.addColorStop(0, '#87CEEB');
+            oceanGradient.addColorStop(0.6, '#4682B4');
+            oceanGradient.addColorStop(1, '#191970');
+            
+            ctx.fillStyle = oceanGradient;
             ctx.beginPath();
-            ctx.moveTo(centerX, centerY - 40);
-            ctx.lineTo(centerX - 3, centerY + 35);
-            ctx.lineTo(centerX + 3, centerY + 35);
-            ctx.closePath();
+            ctx.arc(centerX, centerY, earthRadius, 0, Math.PI * 2);
             ctx.fill();
             
-            // 中心圆
-            ctx.fillStyle = '#FFD700';
+            // 绘制大陆轮廓 - 简化的大陆形状
+            ctx.fillStyle = '#228B22';
+            
+            // 亚洲大陆
             ctx.beginPath();
-            ctx.arc(centerX, centerY, 8, 0, Math.PI * 2);
+            ctx.ellipse(centerX + 5, centerY - 8, 12, 8, Math.PI / 6, 0, Math.PI * 2);
             ctx.fill();
+            
+            // 非洲大陆
+            ctx.beginPath();
+            ctx.ellipse(centerX - 8, centerY + 5, 6, 10, Math.PI / 4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 美洲大陆
+            ctx.beginPath();
+            ctx.ellipse(centerX - 18, centerY, 5, 15, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 欧洲
+            ctx.beginPath();
+            ctx.ellipse(centerX - 3, centerY - 12, 4, 3, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 澳洲
+            ctx.beginPath();
+            ctx.ellipse(centerX + 12, centerY + 12, 3, 2, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 绘制地球边缘高光
+            const highlightGradient = ctx.createRadialGradient(
+                centerX - 12, centerY - 12, 0,
+                centerX, centerY, earthRadius
+            );
+            highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+            highlightGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.1)');
+            highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            
+            ctx.fillStyle = highlightGradient;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, earthRadius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 绘制地球边框
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, earthRadius, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // 添加微妙的发光效果
+            ctx.shadowColor = '#4682B4';
+            ctx.shadowBlur = 15;
+            ctx.strokeStyle = 'rgba(70, 130, 180, 0.3)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, earthRadius + 5, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.shadowBlur = 0;
         }
         
         // 设置事件监听器
@@ -444,9 +541,9 @@
         function startDrag(x, y) {
             const distance = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
             
-            // 确定拖拽的是哪个圆环
+            // 确定拖拽的是哪个圆环 - 增加容错范围
             for (const [type, ring] of Object.entries(rings)) {
-                if (Math.abs(distance - ring.radius) < ring.width / 2 + 10) {
+                if (Math.abs(distance - ring.radius) < ring.width / 2 + 15) {
                     isDragging = true;
                     dragRing = type;
                     lastAngle = Math.atan2(y - centerY, x - centerX) * 180 / Math.PI;
